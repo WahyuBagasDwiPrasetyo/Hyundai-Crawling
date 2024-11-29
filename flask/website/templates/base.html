@@ -1,0 +1,129 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="" />
+        <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors" />
+        <meta name="generator" content="Hugo 0.84.0" />
+        <title>Hyundai Gowa</title>
+
+        <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/sidebars/" />
+
+        <!-- Bootstrap core CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
+        <!-- Favicons -->
+        <meta name="theme-color" content="#7952b3" />
+
+        <style>
+            .bd-placeholder-img {
+                font-size: 1.125rem;
+                text-anchor: middle;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                user-select: none;
+            }
+
+            @media (min-width: 768px) {
+                .bd-placeholder-img-lg {
+                    font-size: 3.5rem;
+                }
+            }
+        </style>
+
+        {% block style %}
+                        
+        {% endblock %}
+
+        <!-- Custom styles for this template -->
+        <!-- <link href="sidebars.css" rel="stylesheet" /> -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+    </head>
+    <body>
+
+        <main>
+            <div class="d-flex flex-column flex-shrink-0 p-3 text-white" style="width: 17rem; background-color: #1C2D5B;">
+                <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                    <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="" style="width: 14.3125rem;height: 1.52631rem;flex-shrink: 0;" class="mb-4">
+                </a>
+                <hr />
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link text-white {{ 'active' if active_page=='home' else ''}}">
+                            <i class="fa-solid fa-house"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/crawl" class="nav-link text-white {{ 'active' if active_page=='crawling_media' else ''}}">
+                            <i class="fa-regular fa-newspaper"></i>
+                            Crawling Media
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/sentiment" class="nav-link text-white {{ 'active' if active_page=='sentiment_media' else ''}}">
+                            <i class="fa-regular fa-newspaper"></i>
+                            Sentiment Media
+                        </a>
+                    </li>
+                    <!-- check if the session role is admin -->
+                    {% if session['user_role'] == 'admin' %}
+                        <li>
+                            <a href="/user" class="nav-link text-white {{ 'active' if active_page=='user' else ''}}">
+                                <i class="fa-solid fa-user"></i>
+                                Users
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <hr />
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2" /> -->
+                        <strong>{{ session['user_first_name'] }}</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                        <!-- <li><a class="dropdown-item" href="#">New project...</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><hr class="dropdown-divider" /></li> -->
+                        <li><a class="dropdown-item" href="/logout">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            
+            <div class="container-fluid overflow-auto">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} d-flex justify-content-between">
+                                {{ message }}
+                                <!-- button x for hide the alert -->
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <div class="container my-5">
+                    <h2>{% block title %}{% endblock %}</h2>
+                </div>
+                {% block content %}
+                
+                {% endblock %}
+            </div>
+        </main>
+
+        <!-- <script src="sidebars.js"></script> -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://kit.fontawesome.com/c621075835.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+        {% block scripts %}
+        {% endblock %}
+    </body>
+</html>

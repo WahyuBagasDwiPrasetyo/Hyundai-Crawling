@@ -1,0 +1,99 @@
+{%extends "base.html"%}
+{% set active_page = 'home' %}
+{%block title%}Dashboard{%endblock%}
+{%block content%}
+<div class="container">
+    <div class="row mb-3">
+        <!-- create form filter -->
+        <div class="col-md-12">
+            <form action="" method="post">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <input type="date" name="tanggal" id="tanggal" class="form-control" placeholder="Tanggal">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col">
+                    <div class="card shadow-lg mb-5 rounded">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title">News Value</h6>
+                        </div>
+                        <div class="card-body">
+                            <!-- home_data["news_value"] is so big so i need you to cut million and change it to Jt -->
+                            <h1 class="font-weight-light mb-3">{{"{:,.0f}".format(home_data["sum_news_value"]/1000000)}} Jt</h1>
+                            <!-- <h1 class="font-weight-light mb-3">14,744</h1> -->
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="row">
+                                <div class="col-5 pe-0"><p class="text-success">+13,6%</p></div>
+                                <div class="col-7 p-0"><p>from last month</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card shadow-lg mb-5 bg-white rounded">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title">Jumlah Pemberitaan</h6>
+                        </div>
+                        <div class="card-body">
+                            <h1 class="font-weight-light mb-3">{{home_data["count_news"]}}</h1>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="row">
+                                <div class="col-5 pe-0"><p class="text-success">+13,6%</p></div>
+                                <div class="col-7 p-0"><p>from last month</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-lg mb-5 bg-white rounded">
+                <div class="card-header">
+                    <h6 class="card-title">Tren Pemberitaan</h6>
+                </div>
+                <div class="card-body">
+                    <img src="data:image/png;base64,{{ plot_pemberitaan }}" alt="" class="w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6" style="margin-top: -30rem;">
+            <div class="card shadow-lg mb-5 bg-white rounded">
+                <div class="card-header">
+                    <h6 class="card-title">Top Media Rangking</h6>
+                </div>
+                <div class="card-body">
+                    <img src="data:image/png;base64,{{ plot_media }}" alt="" class="w-100">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-lg mb-5 bg-white rounded">
+                <div class="card-header">
+                    <h6 class="card-title">Top Penulis Rangking</h6>
+                </div>
+                <div class="card-body">
+                    <img src="data:image/png;base64,{{ plot_author }}" alt="" class="w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

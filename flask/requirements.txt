@@ -1,0 +1,8 @@
+sentencepiece
+torch
+transformers
+Flask
+Flask-Login
+Flask-SQLAlchemy
+SQLAlchemy
+Flask-Session

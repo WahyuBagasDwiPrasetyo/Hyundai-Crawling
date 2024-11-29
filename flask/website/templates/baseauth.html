@@ -1,0 +1,91 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="" />
+        <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors" />
+        <meta name="generator" content="Hugo 0.84.0" />
+        <title>Sidebars · Bootstrap v5.0</title>
+
+        <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/sidebars/" />
+
+        <!-- Bootstrap core CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+        <!-- Favicons -->
+        <link rel="apple-touch-icon" href="/docs/5.0/assets/img/favicons/apple-touch-icon.png" sizes="180x180" />
+        <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png" />
+        <link rel="manifest" href="/docs/5.0/assets/img/favicons/manifest.json" />
+        <link rel="mask-icon" href="/docs/5.0/assets/img/favicons/safari-pinned-tab.svg" color="#7952b3" />
+        <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon.ico" />
+        <meta name="theme-color" content="#7952b3" />
+
+        <style>
+            .bd-placeholder-img {
+                font-size: 1.125rem;
+                text-anchor: middle;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                user-select: none;
+            }
+
+            @media (min-width: 768px) {
+                .bd-placeholder-img-lg {
+                    font-size: 3.5rem;
+                }
+            }
+        </style>
+
+        <!-- Custom styles for this template -->
+        <!-- <link href="sidebars.css" rel="stylesheet" /> -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+    </head>
+    <body>
+
+        <main>
+            <div class="d-flex flex-column flex-shrink-0 p-3 text-white justify-content-center align-items-center" style="width: 31.5625rem; background-color: #1C2D5B;">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" style="width: 10.5rem;height: 5rem;flex-shrink: 0;" class="mb-4">
+                <img src="{{ url_for('static', filename='img/logo-text.png') }}" alt="" style="width: 27.3125rem;
+                height: 7.125rem;
+                flex-shrink: 0;">
+            </div>
+            
+            <div class="container-fluid overflow-auto">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} d-flex justify-content-between">
+                                {{ message }}
+                                <!-- button x for hide the alert -->
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <div class="row justify-content-center align-items-center min-vh-100">
+                    <div class="col-md-6">
+                        <div class="card shadow-lg p-4 mb-5 bg-white rounded">
+                            <div class="card-body">
+                                <!-- Logo -->
+                                <h3 class="font-weight-light mb-3" style="color: #1C2D5B;">{% block title %}Login{% endblock %}</h3>
+                                <!-- Login Form -->
+                                {% block content %}
+                                {% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+        <!-- <script src="sidebars.js"></script> -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://kit.fontawesome.com/c621075835.js" crossorigin="anonymous"></script>
+        <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+        {% block scripts %}
+        {% endblock %}
+    </body>
+</html>

@@ -1,0 +1,52 @@
+{%extends "base.html"%}
+{% set active_page = 'user' %}
+{%block title%}Users{%endblock%}
+{%block content%}
+<div class="container mt-3">
+    <div class="row">
+        <div class="col">
+            <input class="form-control mb-4" id="tableSearch" type="text" placeholder="Search">
+        </div>
+        <div class="col">
+            <a href="/user/add" class="btn btn-primary float-end">
+                Add User
+            </a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Created Date</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="myTable">
+                {%for user in user_data%}
+                <tr>
+                    <th scope="row">{{loop.index}}</th>
+                    <td>{{user.first_name}}</td>
+                    <td>{{user.email}}</td>
+                    <td>{{user.role}}</td>
+                    <td>{{user.created_at}}</td>
+                    <td>
+                        <a href="/user/edit/{{user.id}}" class="btn btn-warning btn-sm">Edit</a>
+                        <form method="POST" action="/user/delete/{{user.id}}" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                        <!-- <a href="/user/delete/{{user.id}}" class="btn btn-danger btn-sm">Delete</a> -->
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+    
+</div>
+{%endblock%}

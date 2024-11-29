@@ -1,0 +1,173 @@
+import aiohttp
+import asyncio
+import lxml.html
+from tqdm import tqdm
+import pandas as pd
+from concurrent.futures import ProcessPoolExecutor
+from transformers import T5ForConditionalGeneration, T5Tokenizer
+from .sentiment import sentiment
+import requests_cache
+from website.models import CrawlingData
+from website import db
+from datetime import datetime
+
+# Initialize T5 model and tokenizer for summarization
+model = T5ForConditionalGeneration.from_pretrained('t5-small')
+tokenizer = T5Tokenizer.from_pretrained('t5-small', legacy=False)
+
+# Setup caching to avoid repeated requests
+requests_cache.install_cache('detik_cache', expire_after=1800)  # Cache expires after 30 minutes
+
+# Asynchronous function to fetch page content
+async def fetch_page(session, url):
+    try:
+        async with session.get(url) as response:
+            response.raise_for_status()
+            return await response.text()
+    except Exception as e:
+        print(f"Error fetching {url}: {e}")
+        return None
+
+# Asynchronous function to scrape article details
+async def scrape_article(session, link, start_date, end_date):
+    try:
+        detail_html = await fetch_page(session, link)
+        if detail_html:
+            detail_soup = lxml.html.fromstring(detail_html)
+            # Extract date
+            date = detail_soup.xpath('//ul[@class="post-info-dark mb-20 small"]/li/text()')
+            date = date[0].strip() if date else 'Date not found'
+
+            # Convert date to datetime object for comparison
+            try:
+                article_date = datetime.strptime(date, "%d %b %Y")  # Modify format based on actual date format
+            except ValueError:
+                article_date = None
+
+            # Check if the article date is within the specified range
+            if article_date:
+                if start_date and article_date < start_date:
+                    return None  # Skip article if the date is before start_date
+                if end_date and article_date > end_date:
+                    return None  # Skip article if the date is after end_date
+                
+
+            # Extract author
+            author = detail_soup.xpath('//div[@class="small"]/span/text()')
+            author = author[0].strip() if author else 'Author not found'
+            # Extract content
+            
+            content_div = detail_soup.xpath('//div[@class="post-content clearfix"]')
+            # get content only inside tag <p> and get 1. if theres no p tag, content not found
+            if(content_div):
+                if(content_div.find_all('p')):
+                    content = ' '.join([p.get_text(strip=True) for p in content_div.find_all('p')[:1]])
+                else:
+                    # Remove unwanted elements
+                    for tag in content_div.find_all(['br', 'span', 'div', 'ul']):
+                        # Remove span with class 'baca-juga', div with class 'small', and ul with class 'blog-tags'
+                        if tag.name == 'span' and 'baca-juga' in tag.get('class', []):
+                            tag.decompose()  # Removes the tag from the tree
+                        elif tag.name == 'div' and 'small' in tag.get('class', []):
+                            tag.decompose()
+                        elif tag.name == 'ul' and 'blog-tags' in tag.get('class', []):
+                            tag.decompose()
+                        elif tag.name == 'br':
+                            tag.decompose()  # Removes <br> tags
+
+                    # Extract text from the cleaned content_div
+                    content = content_div.get_text(strip=True)
+            else:
+                content = 'Content not found'
+            return date, author, content
+        else:
+            return 'Date not found', 'Author not found', 'Content not found'
+    except Exception as e:
+        print(f"Error scraping {link}: {e}")
+        return 'Date not found', 'Author not found', 'Content not found'
+
+# Function to summarize text
+def summarize_text(text):
+    inputs = tokenizer.encode("summarize: " + text, return_tensors="pt", max_length=512, truncation=True)
+    summary_ids = model.generate(inputs, max_length=150, min_length=40, length_penalty=2.0, num_beams=4, early_stopping=True)
+    return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+
+# Asynchronous function to scrape a single page of articles
+async def scrape_page(session, keyword, page, data):
+    url = f'https://www.antaranews.com/search?q={keyword}&page={page}'
+    page_html = await fetch_page(session, url)
+    if not page_html:
+        return
+    
+    tree = lxml.html.fromstring(page_html)
+    articles = tree.xpath('//div[@class="card__post__body"]')
+
+    tasks = []
+    for article in articles:
+        title_tag = article.xpath('.//h2[@class="h5"]/a')
+        if title_tag:
+            title = title_tag[0].text.strip()
+            link = title_tag[0].attrib['href']
+            tasks.append(scrape_article(session, link))
+
+    article_details = await asyncio.gather(*tasks)
+
+    # Append the scraped data to the list
+    for title, link, (date, author, content) in zip(
+        [article.xpath('.//h2[@class="h5"]/a/text()')[0] for article in articles],
+        [article.xpath('.//h2[@class="h5"]/a/@href')[0] for article in articles],
+        article_details
+    ):
+        sentiment_score = sentiment(content)
+        summary = summarize_text(content)
+        data.append({
+            'Judul': title,
+            'Tanggal': date,
+            'Author': author,
+            'Link': link,
+            'Detail': content,
+            'Sentiment': sentiment_score,
+            'Ringkasan': summary
+        })
+
+# Main function to crawl data across multiple pages
+def crawl_antara_news(keyword, start_page=1, end_page=2, start_date = "", end_date = ""):
+    # Initialize list to hold scraped data
+    data = []
+
+    # Create an asyncio session
+    async def main():
+        async with aiohttp.ClientSession() as session:
+            tasks = []
+            for page in range(start_page, end_page + 1):
+                tasks.append(scrape_page(session, keyword, page, data))
+            await asyncio.gather(*tasks)
+
+    # Run the asyncio event loop
+    asyncio.run(main())
+
+    # Convert the data into a DataFrame and save it to database
+    df = pd.DataFrame(data)
+
+    # Bulk insert data into the database
+    batch_data = []
+    for index, row in df.iterrows():
+        new_data = CrawlingData(
+            title=row['Judul'], 
+            link=row['Link'], 
+            author=row['Author'], 
+            news_value=52500000, 
+            detail=row['Detail'], 
+            summary=row['Ringkasan'], 
+            media='antara', 
+            description='Description', 
+            news_date=row['Tanggal'],
+            sentiment=row['Sentiment']
+        )
+        batch_data.append(new_data)
+    
+    # Add to DB in bulk and commit once
+    db.session.bulk_save_objects(batch_data)
+    db.session.commit()
+
+    return df

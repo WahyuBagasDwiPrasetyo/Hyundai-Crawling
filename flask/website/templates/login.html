@@ -1,0 +1,42 @@
+{%extends "baseauth.html"%}
+{%block title%}Login{%endblock%}
+{%block content%}
+
+<form action="{{ url_for('auth.login') }}" method="post">
+    <!-- Email Input -->
+    <div class="form-group mb-3">
+        <label for="emailAddress">Email Address</label>
+        <input name="email" type="email" id="emailAddress" class="form-control" required autofocus>
+    </div>
+    <!-- Password Input -->
+    <div class="form-group position-relative">
+        <label for="password">Password</label>
+        <div class="input-group">
+            <input type="password" id="password" class="form-control" required name="password">
+            <span class="input-group-text" id="basic-addon1"><i toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></i></span>
+        </div>
+        <!-- Eye Icon -->
+    </div>
+    <!-- Forgot Password Link -->
+    <div class="form-group text-end mb-3">
+        <a href="#" class="">Forgot Password?</a>
+    </div>
+    <!-- Sign In Button -->
+    <button type="submit" class="btn btn-primary btn-block" style="width: 100%;border-radius: 14px;background: #1C2D5B;color: white;">Sign In</button>
+</form>
+{%endblock%}
+
+{%block scripts%}
+<script>
+    // Toggle password visibility
+    $(".toggle-password").click(function() {
+        $(this).toggleClass("fa-eye fa-eye-slash");
+        var input = $($(this).attr("toggle"));
+        if (input.attr("type") == "password") {
+            input.attr("type", "text");
+        } else {
+            input.attr("type", "password");
+        }
+    });
+</script>
+{%endblock%}
